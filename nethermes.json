@@ -1,0 +1,7 @@
+{
+	"Charset":"abcdefghijklmnopqrstuvwxyz0123456789",
+	"KeyLength":10,
+	"Port":8080,
+	"TimeoutMinutes":3,
+	"CheckMinutes":3
+}

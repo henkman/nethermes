@@ -1,0 +1,91 @@
+<html>
+	<head>
+		<title>Net.Hermes</title>
+		<link type="image/x-icon" rel="shortcut icon" href="/favicon.ico"></link>
+		<link type="text/css" rel="stylesheet" href="/style.css"></link>
+		<script type="text/javascript" src="/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript">
+			var status = null;
+
+			function getStatus() {
+				jQuery.ajax({
+					url: "/status/{{.Key}}", 
+					success: function(data) {
+						var code = parseInt(data, 10);
+						switch(code) {
+							case 0:
+								jQuery("#info").html("Waiting for receiver...<br/>");
+								setTimeout(function(){getStatus()}, 3000);
+							break;
+							case 1:
+								jQuery("#up .url").hide();
+								jQuery("#info").html("Transfering...<br/>");
+								setTimeout(function(){getStatus()}, 3000);
+							break;
+							case 2:
+								jQuery("#info").html("<a href=\"\"><h2>Timeout, no receiver connected: Try again</h2></a><br/>");
+							break;
+							case 3:
+								jQuery("#info").html("<a href=\"\"><h2>Success: Transfer more</h2></a><br/>");
+							break;
+						}
+					},
+					error: function(jqXHR, textStatus, errorThrown) {
+						jQuery("#info").append("Status Error: " + textStatus + "," + errorThrown + "<br/>\n");
+					},
+					dataType: "json",
+				});
+			}
+		
+			jQuery(document).ready(function() {
+				jQuery("#up").submit(function(event) {
+					event.preventDefault();
+
+					jQuery("#up .controls, #up .fields").hide();
+					jQuery.ajax({
+						url: "/upload/{{.Key}}",
+						data: new FormData(jQuery(this)[0]),
+						type: "POST",
+						processData: false,
+						contentType: false,
+						error: function(jqXHR, textStatus, errorThrown) {
+							jQuery("#info").append("Upload Error: " + textStatus + "," + errorThrown + "<br/>\n");
+						},
+					});
+				
+					setTimeout(function(){getStatus()}, 1000);
+				});
+				jQuery("#up .addfield").click(function() {
+					jQuery("#up .fields").append("<p><input type=\"file\" name=\"file\" /></p>");
+				});
+				
+				jQuery("#up .remfield").click(function() {
+					if(jQuery("#up .fields p").size() > 1) {
+						jQuery("#up .fields p").last().remove();
+					}
+				});
+				jQuery("#up .url").click(function() {
+					jQuery(this).select();
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<h1>Net.Hermes - Transfer Everything</h1>
+		<form id="up" action="/upload/{{.Key}}" method="post" enctype="multipart/form-data">
+			<div class="fields">
+				<p><input type="file" name="file" /></p>
+			</div>
+			<hr/>
+			<p class="controls">
+				<input type="button" class="addfield" value="+"/>
+				<input type="button" class="remfield" value="-"/>
+				<input type="submit" value="Start Upload" id="submit" />
+			</p>			
+			<p>
+				<input readonly type="text" class="url" value="http://{{.Host}}/download/{{.Key}}"/>
+			</p>
+		</form>
+		<p id="info"></p>
+	</body>
+</html>

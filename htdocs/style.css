@@ -1,0 +1,16 @@
+body {
+	color: white;
+	background-color: #333333;
+	width: 550px;
+	margin-top: 50px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.url {
+	width: 400px;
+}
+
+a, a:visited, a:hover {
+	color: white;
+}
